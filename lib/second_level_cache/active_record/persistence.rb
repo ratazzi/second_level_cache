@@ -12,7 +12,8 @@ module SecondLevelCache
       # https://github.com/rails/rails/blob/5-0-stable/activerecord/lib/active_record/persistence.rb#L441
       def reload(options = nil)
         expire_second_level_cache
-        super(options)
+        # Rails 7.1+ reload uses find_by! instead of find, which skips find_one cache write
+        super(options).tap { write_second_level_cache }
       end
 
       # https://github.com/rails/rails/blob/5-0-stable/activerecord/lib/active_record/persistence.rb#L490
