@@ -8,7 +8,7 @@ module SecondLevelCache
           return super if kwargs[:async]
           return super unless klass.second_level_cache_enabled?
           return super if klass.default_scopes.present? || reflection.scope
-          return super if reflection.active_record_primary_key.to_s != klass.primary_key
+          return super if reflection.association_primary_key(klass).to_s != klass.primary_key
 
           cache_record = klass.read_second_level_cache(second_level_cache_key)
           if cache_record
@@ -25,8 +25,10 @@ module SecondLevelCache
         end
 
         private
+          # Rails 7.1+ derives a composite foreign_key when the owner has query_constraints,
+          # and pairs it with the (single) primary key by position, so use the first column.
           def second_level_cache_key
-            owner[reflection.foreign_key]
+            owner[Array(reflection.foreign_key).first]
           end
       end
     end
