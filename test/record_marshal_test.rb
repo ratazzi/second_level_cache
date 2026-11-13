@@ -22,7 +22,8 @@ class RecordMarshalTest < ActiveSupport::TestCase
   end
 
   def test_should_dump_active_record_object
-    dumped = RecordMarshal.dump(@user)
+    user = User.without_second_level_cache { User.find(@user.id) }
+    dumped = RecordMarshal.dump(user)
     assert dumped.is_a?(Array)
     assert_equal "User", dumped[0]
     assert_equal dumped[1], ActiveRecord::Base.connection.select_all(User.where(id: @user.id)).first
